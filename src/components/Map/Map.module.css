@@ -1,0 +1,20 @@
+/* Map */
+.Map {
+    width: 50%;
+    height: 100%;
+    background-color: rgb(255, 0, 0);    
+    color: honeydew;
+}
+
+#mapid { height: 180px; }
+
+@media (min-width:600px) {
+    .Map {
+        width: 50%;
+        height: 100%;
+        background-color: rgb(0, 253, 114);
+        float: left;
+    }    
+
+    #mapid { height: 180px; }
+}
