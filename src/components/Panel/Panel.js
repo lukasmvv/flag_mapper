@@ -1,10 +1,10 @@
 import React from 'react';
 import classes from './Panel.module.css';
 
-const panel = () => {
+const panel = (props) => {
     return (
         <div className={classes.Panel}>
-            <p>this is a panel</p>
+            {props.children}
         </div>  
     );
 };

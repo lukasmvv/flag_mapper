@@ -1,34 +1,38 @@
 import React, {Component} from 'react';
-//import { Map, TileLayer, Marker, Popup, GeoJSON } from 'react-leaflet';
+import { Map, TileLayer, Marker, Popup, GeoJSON } from 'react-leaflet';
+import "leaflet/dist/leaflet.css";
+import "./Map.css"; // overwrite default map css
 import classes from './Map.module.css';
-import MapGL, {Source, Layer} from 'react-map-gl';
-import {dataLayer} from './map-style.js';
-var mapData = require('../../data/localData.json'); 
+import localMuni from '../../data/localData.json'; 
 
-const MAPBOX_TOKEN = 'pk.eyJ1IjoibHVrYXNtdnYiLCJhIjoiY2tlbXl1bXAxMzR2bTJ5bHRoYm9xbmZvZiJ9.grLSLQucuMr5Lbd-7UXpFQ'; // Set your mapbox token here
+// https://www.youtube.com/watch?v=D4jq5Bd9bTA&list=WL&index=2&t=0s&ab_channel=CodingWithAdam
+// https://datahub.io/
+
+const totalPop = 57780000;
 
 class map extends Component {
 
+    totalPopulation = localMuni.map(m => parseInt(m["Population(2016)[3]"].replaceAll(',',''))).reduce((a, b) => a + b, 0);
     state = {
         viewport: {
             latitude: -29.162118,
             longitude: 24.845233,
-            zoom: 3,
-            bearing: 0,
-            pitch: 0
+            zoom: 5.4
         },
-        hoveredFeature: null,
+        color: "#FFFF00",
         data: {
                 type: "FeatureCollection",
-                features: mapData.map(m => {
+                features: localMuni.map(m => {
                 return {
                     "type": "Feature",
                     "properties": {
                         "CODE": m.Code,
                         "NAME": m.Name,
                         "DISTRICT": m.District,
+                        "PROVINCE": m.Province,
                         "AREA": m["Area(km2)[2]"],
-                        "POPULATION": m["Population(2016)[3]"]
+                        "POPULATION": parseInt(m["Population(2016)[3]"].replaceAll(',','')),
+                        "POPPER": 100*parseInt(m["Population(2016)[3]"].replaceAll(',',''))/this.totalPopulation
                     },
                     "geometry": m.GeoJSON
                 };
@@ -36,107 +40,88 @@ class map extends Component {
         }
     }
     
-
-    handleClick = (e) => {
-        //this.setState({ currentPos: e.latlng });
-        console.log(e);
+    componentDidMount() {
+      console.log(this.state);
     }
 
-    onEachFeature = (component, feature, layer) => {
-        console.log(component);
-        console.log(feature);
-        console.log(layer);
-        layer.on({
-            // mouseover: this.highlightFeature.bind(this),
-            // mouseout: this.resetHighlight.bind(this),
-            // click: (feature) => clickToFeature(feature)
-            click: this.clickToFeature.bind(this)
-          });
+    getColor = (d) => {
+      if (d==='Gauteng') {
+        return 'red';
+      } else if (d==='Western Cape') {
+        return 'green';
+      } else if (d==='Eastern Cape') {
+        return 'blue';
+      } else if (d==='KwaZulu-Natal') {
+        return 'pink';
+      } else if (d==='Northern Cape') {
+        return 'yellow';
+      } else if (d==='Free State') {
+        return 'orange';
+      } else if (d==='Limpopo') {
+        return 'salmon';
+      } else if (d==='Mpumalanga') {
+        return 'aqua';
+      } else if (d==='North West') {
+        return 'grey';
+      }
+      return 'white';
+    }
+
+    districtStyle = {
+        fillColor: 'green',
+        weight: 2,
+        opacity: 1,
+        color: 'black',
+        dashArray: '2',
+        fillOpacity: 0.5
+    };
+
+    onEachDistrict = (district, layer) => {  
+      const dName = district.properties.NAME;
+      const pop = district.properties.POPULATION;
+      //console.log(countryName);
+      layer.bindPopup(`${dName}: ${pop} / ${district.properties.POPPER}`);
+      layer.options.fillColor = this.getColor(district.properties.PROVINCE);
+      //console.log(district.properties.POPPER);
+      layer.options.fillOpacity = district.properties.POPPER;
+      layer.on({
+        mouseover: this.mouseover,
+        click: this.clickToFeature,
+      });
+    };
+
+    mouseover = (e) => {
+      // e.target.setStyle({
+      //   color: 'green',
+      //   fillColor: 'yellow'
+      // });
     }
 
     clickToFeature = (e) => {
-        console.log(e.target);
+      const muniProps = e.target.feature.properties;
+      console.log(muniProps);
+      e.target.setStyle({
+        // color: 'green',
+        fillColor: this.state.color,
+        fillOpacity: 1
+      });
     }
 
-    // renderDistricts = (data) => {
-    //     return data.map(d => {
-    //         let style = { color: 'blue' };
-    //         if (d.properties.CODE.includes('WC')) {
-    //             style = { color: 'red' };
-    //         }
-    //         return <GeoJSON key={d.properties.CODE} data={d} style={style} onEachFeature={this.onEachFeature.bind(null,this)}></GeoJSON>
-    //     });
-    // }
-
-    _onViewportChange = viewport => this.setState({viewport});
-
-    _onHover = event => {
-        const {
-          features,
-          srcEvent: {offsetX, offsetY}
-        } = event;
-        const hoveredFeature = features && features.find(f => f.layer.id === 'data');
-    
-        this.setState({hoveredFeature, x: offsetX, y: offsetY});
-      };
-
-      _renderTooltip() {
-        const {hoveredFeature, x, y} = this.state;
-    
-        return (
-          hoveredFeature && (
-            <div className="tooltip" style={{left: x, top: y}}>
-              <div>State: {hoveredFeature.properties.NAME}</div>
-              {/* <div>Median Household Income: {hoveredFeature.properties.value}</div>
-              <div>Percentile: {(hoveredFeature.properties.percentile / 8) * 100}</div> */}
-            </div>
-          )
-        );
-      }
-
-      _onClick = event => {
-        const {
-          features,
-          srcEvent: { offsetX, offsetY }
-        } = event;
-        console.log(features[0])
-      };
+    colorChange = (e) => {
+      this.setState({color: e.target.value});
+    }
 
     render() {
-        const {viewport, data} = this.state;
-        return (
-            <div className={classes.Map}>
-                {/* <Map 
-                     center={[-29.162118, 24.845233]} 
-                     zoom={5.3} 
-                     style={{ width: '100%', height: '100%'}}
-                    //  onClick={handleClick}
-                  >
-                  <TileLayer
-                    attribution='&copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                   />
-                   <GeoJSON data={props.data}/> */}
-                   {/* <GeoJSON data={geoData} />
-                   {this.renderDistricts(this.state.geoData)}
-                 </Map> */}
-                <MapGL
-                    {...viewport}
-                    width="100%"
-                    height="100%"
-                    mapStyle="mapbox://styles/mapbox/light-v9"
-                    onViewportChange={this._onViewportChange}
-                    mapboxApiAccessToken={MAPBOX_TOKEN}
-                    onHover={this._onHover}
-                    onClick={this._onClick}
-                    >
-                    <Source type="geojson" data={data}>
-                        <Layer {...dataLayer} />
-                    </Source>
-                    {this._renderTooltip()}
-                </MapGL>
-            </div>  
-        );
+      const {viewport, data} = this.state;
+      
+      return (
+          <div className={classes.Map}>
+              <Map center={[viewport.latitude, viewport.longitude]} zoom={viewport.zoom} style={{ width: '100%', height: '100%'}}>
+                <GeoJSON data={data.features} style={this.districtStyle} onEachFeature={this.onEachDistrict}/>
+              </Map>
+              {/* <input type="color" value={this.state.color} onChange={this.colorChange}></input> */}
+          </div>  
+      );
     };
 };
 

@@ -1,6 +1,6 @@
 /* PANEL */
 .Panel {
-    width: 15%;
+    width: 20%;
     height: 100%;
     background-color: rgb(255, 0, 0);    
     color: honeydew;
@@ -8,9 +8,11 @@
 
 @media (min-width:600px) {
     .Panel {
-        width: 15%;
+        /* border: black 1px solid; */
+        width: 20%;
         height: 100%;
-        background-color: rgb(55, 0, 253);
-        float: left;
+        background-color: rgb(255, 255, 255);
+        color: black;
+        float: left;        
     }
 }
