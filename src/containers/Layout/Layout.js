@@ -3,25 +3,39 @@ import classes from './Layout.module.css';
 import Map from '../../components/Map/Map';
 import Panel from '../../components/Panel/Panel';
 import AreaConfig from '../../components/Panel/AreaConfig/AreaConfig';
+
+import {connect} from 'react-redux';
+import * as actionTypes from '../../store/actions/actionTypes';
 //import axios from 'axios';
 
 class Layout extends Component {
     state = {
         testData: []
     }
+
+    numberWithCommas = (x) => {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
     render() {
+        console.log(this.props.localPop);
         return (
             <div className={classes.Layout}>
-                <p>this is a test</p>
+                <p>Total Population: {this.numberWithCommas(this.props.totalPop)}  ||  Area Goal Population: {this.numberWithCommas(this.props.totalPop/Math.max(1,this.props.areas.length))}</p>
+                <p>{this.numberWithCommas(this.props.localPop)}</p>
                 <div className={classes.Content}>
                     <Map data={this.state.testData}/>
                     <Panel>
-                        <AreaConfig color='#007749' active={true}></AreaConfig>
-                        <AreaConfig color='#000000' active={false}></AreaConfig>
-                        <AreaConfig color='#FFFFFF' active={false}></AreaConfig>
-                        <AreaConfig color='#FFB81C' active={false}></AreaConfig>
-                        <AreaConfig color='#E03C31' active={false}></AreaConfig>
-                        <AreaConfig color='#001489' active={false}></AreaConfig>
+                        {this.props.areas.map(area => {
+                            const propsToUse = {
+                                color: area.color,
+                                active: area.active,
+                                key: area.key,
+                                id: area.key,
+                                population: area.population
+                            }
+                            return <AreaConfig {...propsToUse}></AreaConfig>
+                        })}
                     </Panel>
                 </div>
             </div>
@@ -29,4 +43,18 @@ class Layout extends Component {
     }
 };
 
-export default Layout;
+const mapStateToProps = state => {
+    return {
+        areas: state.areas,
+        localPop: state.localPop,
+        totalPop: state.totalPopulation
+    }
+}
+
+// const mapDispatchToProps = dispatch => {
+//     return {
+//         onTryAutoSignUp: () => dispatch(actions.authCheckState())
+//     }
+// }
+
+export default connect(mapStateToProps, null)(Layout);

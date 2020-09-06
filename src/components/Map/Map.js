@@ -4,6 +4,8 @@ import "leaflet/dist/leaflet.css";
 import "./Map.css"; // overwrite default map css
 import classes from './Map.module.css';
 import localMuni from '../../data/localData.json'; 
+import {connect} from 'react-redux';
+import * as actions from '../../store/actions/areas';
 
 // https://www.youtube.com/watch?v=D4jq5Bd9bTA&list=WL&index=2&t=0s&ab_channel=CodingWithAdam
 // https://datahub.io/
@@ -32,7 +34,8 @@ class map extends Component {
                         "PROVINCE": m.Province,
                         "AREA": m["Area(km2)[2]"],
                         "POPULATION": parseInt(m["Population(2016)[3]"].replaceAll(',','')),
-                        "POPPER": 100*parseInt(m["Population(2016)[3]"].replaceAll(',',''))/this.totalPopulation
+                        "POPPER": 100*parseInt(m["Population(2016)[3]"].replaceAll(',',''))/this.totalPopulation,
+                        "COLOR": "#FFF000"
                     },
                     "geometry": m.GeoJSON
                 };
@@ -40,9 +43,9 @@ class map extends Component {
         }
     }
     
-    componentDidMount() {
-      console.log(this.state);
-    }
+    // componentDidMount() {
+    //   console.log(this.state);
+    // }
 
     getColor = (d) => {
       if (d==='Gauteng') {
@@ -79,15 +82,15 @@ class map extends Component {
     onEachDistrict = (district, layer) => {  
       const dName = district.properties.NAME;
       const pop = district.properties.POPULATION;
-      //console.log(countryName);
-      layer.bindPopup(`${dName}: ${pop} / ${district.properties.POPPER}`);
+      // layer.bindPopup(`${dName}: ${pop}`);
       layer.options.fillColor = this.getColor(district.properties.PROVINCE);
-      //console.log(district.properties.POPPER);
+      layer.options.color = 'grey';
       layer.options.fillOpacity = district.properties.POPPER;
       layer.on({
         mouseover: this.mouseover,
         click: this.clickToFeature,
       });
+      this.props.addToTotalPop(pop);
     };
 
     mouseover = (e) => {
@@ -95,16 +98,30 @@ class map extends Component {
       //   color: 'green',
       //   fillColor: 'yellow'
       // });
+      const muniProps = e.target.feature.properties;
+      const population = muniProps.POPULATION;
+      this.props.updateLocalPop(population);
     }
 
     clickToFeature = (e) => {
       const muniProps = e.target.feature.properties;
-      console.log(muniProps);
+      const population = muniProps.POPULATION;
+      //console.log(muniProps);
+      // console.log(this.props.areas);
+      const area = this.props.areas.filter(area => area.active);
+      const newColor = area[0].color;
+      const oldColor = e.target.options.fillColor;
       e.target.setStyle({
-        // color: 'green',
-        fillColor: this.state.color,
+        // color: 'pink',
+        fillColor: newColor,
         fillOpacity: 1
       });
+      // console.log(oldColor);
+      // console.log(newColor);
+      // console.log(population);
+      this.props.updatePopulations(oldColor, newColor, population);
+
+      //dipsatch action here to add/remove poulation
     }
 
     colorChange = (e) => {
@@ -113,10 +130,10 @@ class map extends Component {
 
     render() {
       const {viewport, data} = this.state;
-      
+      // const data = this.props.data
       return (
           <div className={classes.Map}>
-              <Map center={[viewport.latitude, viewport.longitude]} zoom={viewport.zoom} style={{ width: '100%', height: '100%'}}>
+              <Map center={[viewport.latitude, viewport.longitude]} zoom={viewport.zoom} zoomSnap={0.25} zoomDelta={0.25} style={{ width: '100%', height: '100%'}}>
                 <GeoJSON data={data.features} style={this.districtStyle} onEachFeature={this.onEachDistrict}/>
               </Map>
               {/* <input type="color" value={this.state.color} onChange={this.colorChange}></input> */}
@@ -125,4 +142,20 @@ class map extends Component {
     };
 };
 
-export default map;
+const mapStateToProps = state => {
+  return {
+      areas: state.areas,
+      // data: state.data,
+      // totalPopulation: state.totalPopulation
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+      updatePopulations: (oldColor, newColor, population) => dispatch(actions.updatePopulations(oldColor, newColor, population)),
+      updateLocalPop: (localPop) => dispatch(actions.updateLocalPop(localPop)),
+      addToTotalPop: (pop) => dispatch(actions.addToTotalPop(pop))
+    }
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(map);
