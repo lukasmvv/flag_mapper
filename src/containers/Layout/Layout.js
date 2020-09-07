@@ -3,7 +3,7 @@ import classes from './Layout.module.css';
 import Map from '../../components/Map/Map';
 import Panel from '../../components/Panel/Panel';
 import AreaConfig from '../../components/Panel/AreaConfig/AreaConfig';
-
+import * as utils from '../../utils/utils';
 import {connect} from 'react-redux';
 // import * as actionTypes from '../../store/actions/actionTypes';
 //import axios from 'axios';
@@ -13,15 +13,13 @@ class Layout extends Component {
         testData: []
     }
 
-    numberWithCommas = (x) => {
-        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-
     render() {
         return (
             <div className={classes.Layout}>
-                <p>Total Population: {this.numberWithCommas(this.props.totalPop)}  ||  Area Goal Population: {this.numberWithCommas(this.props.totalPop/Math.max(1,this.props.areas.length))}</p>
-                <p>{this.props.localMuni}: {this.numberWithCommas(this.props.localPop)}</p>
+                <div className={classes.HeaderText}>
+                    <p>Total Population: {utils.numberWithCommas(this.props.totalPop)}  ||  Area Goal Population: {utils.numberWithCommas(this.props.totalPop/Math.max(1,this.props.areas.length))}</p>
+                    <p>{this.props.localMuni}: {utils.numberWithCommas(this.props.localPop)}</p>
+                </div>
                 <div className={classes.Content}>
                     <Map data={this.state.testData}/>
                     <Panel>

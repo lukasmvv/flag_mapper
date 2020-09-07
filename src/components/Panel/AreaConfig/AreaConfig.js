@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import classes from './AreaConfig.module.css';
 import {connect} from 'react-redux';
 import * as actions from '../../../store/actions/areas';
+import * as utils from '../../../utils/utils';
 
 class AreaConfig extends Component {
 
@@ -22,18 +23,14 @@ class AreaConfig extends Component {
         this.setState({active: newActive});
     }
 
-    numberWithCommas = (x) => {
-        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-
     render() {
         const act = this.props.active ? classes.Active : '';
         const cls = [classes.AreaConfig, act].join(' ');
         return (
-            <div className={cls}>
-                <input type="color" value={this.props.color} onChange={this.changeColor} className={classes.Color}/>
-                <div className={classes.Text} onClick={() => this.props.changeActive(this.props.id)}>
-                    <p>Population: {this.numberWithCommas(this.props.population)}</p>
+            <div className={cls} onClick={() => this.props.changeActive(this.props.id)}>
+                <input type="color" value={this.props.color} onChange={this.changeColor} className={classes.Color} disabled={true}/>
+                <div className={classes.Text}>
+                    <p>Population: {utils.numberWithCommas(this.props.population)}</p>
                 </div>                
             </div>
         );
