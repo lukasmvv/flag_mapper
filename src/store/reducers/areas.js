@@ -1,5 +1,4 @@
-import * as actionTypes from '../actions/actionTypes';
-import localMuni from '../../data/localData.json'; 
+import * as actionTypes from '../actions/actionTypes'; 
 
 const initialState = {
     areas: [
@@ -11,26 +10,8 @@ const initialState = {
         {key: 5, color: '#001489', active: false, population: 0},
     ],
     localPop: 0,
-    totalPopulation: 0
-    // data: {
-    //         type: "FeatureCollection",
-    //         features: localMuni.map(m => {
-    //         return {
-    //             "type": "Feature",
-    //             "properties": {
-    //                 "CODE": m.Code,
-    //                 "NAME": m.Name,
-    //                 "DISTRICT": m.District,
-    //                 "PROVINCE": m.Province,
-    //                 "AREA": m["Area(km2)[2]"],
-    //                 "POPULATION": parseInt(m["Population(2016)[3]"].replaceAll(',','')),
-    //                 // "POPPER": 100*parseInt(m["Population(2016)[3]"].replaceAll(',',''))/this.totalPopulation
-    //             },
-    //             "geometry": m.GeoJSON
-    //             };
-    //         })
-    //     },
-    // totalPopulation: localMuni.map(m => parseInt(m["Population(2016)[3]"].replaceAll(',',''))).reduce((a, b) => a + b, 0)
+    totalPopulation: 0,
+    localMuni: ''
 }
 
 const reducer = (state=initialState, action) => {
@@ -49,12 +30,12 @@ const reducer = (state=initialState, action) => {
             return updatedState;
         case actionTypes.UPDATE_POPULATIONS:
             const areas = state.areas.map(area => {
-                if (action.oldColor===action.newColor) {
-                    area.population = area.population;
-                } else if (area.color===action.oldColor) {
-                    area.population = area.population - action.population;
-                } else if (area.color===action.newColor) {
-                    area.population = area.population + action.population;
+                if (action.oldColor!==action.newColor) {
+                    if (area.color===action.oldColor) {
+                        area.population = area.population - action.population;
+                    } else if (area.color===action.newColor) {
+                        area.population = area.population + action.population;
+                    }
                 }
                 return area;
             });
@@ -63,7 +44,8 @@ const reducer = (state=initialState, action) => {
         case actionTypes.UPDATE_LOCAL_POP:
             return {
                 ...state,
-                localPop: action.localPop
+                localPop: action.localPop,
+                localMuni: action.localMuni
             }
         case actionTypes.ADD_TO_LOCAL_POP:
             const pop = state.totalPopulation;

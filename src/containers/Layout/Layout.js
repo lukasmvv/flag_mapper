@@ -5,7 +5,7 @@ import Panel from '../../components/Panel/Panel';
 import AreaConfig from '../../components/Panel/AreaConfig/AreaConfig';
 
 import {connect} from 'react-redux';
-import * as actionTypes from '../../store/actions/actionTypes';
+// import * as actionTypes from '../../store/actions/actionTypes';
 //import axios from 'axios';
 
 class Layout extends Component {
@@ -18,11 +18,10 @@ class Layout extends Component {
     }
 
     render() {
-        console.log(this.props.localPop);
         return (
             <div className={classes.Layout}>
                 <p>Total Population: {this.numberWithCommas(this.props.totalPop)}  ||  Area Goal Population: {this.numberWithCommas(this.props.totalPop/Math.max(1,this.props.areas.length))}</p>
-                <p>{this.numberWithCommas(this.props.localPop)}</p>
+                <p>{this.props.localMuni}: {this.numberWithCommas(this.props.localPop)}</p>
                 <div className={classes.Content}>
                     <Map data={this.state.testData}/>
                     <Panel>
@@ -47,7 +46,8 @@ const mapStateToProps = state => {
     return {
         areas: state.areas,
         localPop: state.localPop,
-        totalPop: state.totalPopulation
+        totalPop: state.totalPopulation,
+        localMuni: state.localMuni
     }
 }
 

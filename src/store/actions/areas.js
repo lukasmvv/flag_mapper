@@ -16,10 +16,11 @@ export const updatePopulations = (oldColor, newColor, population) => {
     }
 }
 
-export const updateLocalPop = (localPop) => {
+export const updateLocalPop = (localPop,localMuni) => {
     return { 
         type: actionTypes.UPDATE_LOCAL_POP,
-        localPop: localPop
+        localPop: localPop,
+        localMuni: localMuni
     }
 }
 
