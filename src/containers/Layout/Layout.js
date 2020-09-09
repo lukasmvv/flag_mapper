@@ -10,7 +10,7 @@ import {connect} from 'react-redux';
 
 class Layout extends Component {
     state = {
-        testData: []
+        activeCountry: "ZA"
     }
 
     render() {
@@ -21,7 +21,7 @@ class Layout extends Component {
                     <p>{this.props.localMuni}: {utils.numberWithCommas(this.props.localPop)}</p>
                 </div>
                 <div className={classes.Content}>
-                    <Map data={this.state.testData}/>
+                    <Map/>
                     <Panel>
                         {this.props.areas.map(area => {
                             const propsToUse = {

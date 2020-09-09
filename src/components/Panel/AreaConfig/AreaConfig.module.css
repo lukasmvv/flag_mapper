@@ -1,9 +1,26 @@
 /* Area Config */
 .AreaConfig {
-    /* width: 70%;
+    height: 10%;
+    background-color: burlywood;
+    border: black 1px solid;
+    border-radius: 5px;
+    width: calc(100% - 2px);
+}
+
+.Color {
+    width: 20%;
     height: 100%;
-    background-color: rgb(255, 0, 0);    
-    color: honeydew; */
+    float: right;
+}
+
+.Text {
+    width: 80%;
+    height: 100%;
+    float: left;
+}
+
+.Active {
+    background-color: cadetblue;
 }
 
 @media (min-width:600px) {

@@ -1,9 +1,9 @@
 /* PANEL */
 .Panel {
-    width: 20%;
+    width: 100%;
     height: 100%;
-    background-color: rgb(255, 0, 0);    
-    color: honeydew;
+    /* background-color: rgb(255, 0, 0);     */
+    color: black;
 }
 
 @media (min-width:600px) {
